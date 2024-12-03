@@ -1,0 +1,37 @@
+{
+    "name": "radishesflight/electronic-prescribing",
+    "description": "多张优惠券,计算出优惠最大的",
+    "type": "library",
+    "version": "1.0.0",
+    "keywords": [
+        "电子处方",
+        "互联网医院",
+        "在线问诊",
+        "electronic",
+        "prescribing",
+        "electronic-prescribing",
+        "Internet hospital",
+        "online medical inquiries"
+    ],
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "radishesflight",
+            "email": "aradishesflight@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "RadishesFlight\\ElectronicPrescribing\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.0-dev"
+        }
+    },
+    "minimum-stability": "dev"
+}
