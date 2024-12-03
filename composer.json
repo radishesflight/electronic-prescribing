@@ -2,6 +2,7 @@
     "name": "radishesflight/electronic-prescribing",
     "description": "电子处方",
     "type": "library",
+    "version": "1.0.0",
     "keywords": [
         "电子处方",
         "互联网医院",
@@ -25,6 +26,11 @@
     "autoload": {
         "psr-4": {
             "RadishesFlight\\ElectronicPrescribing\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.0-dev"
         }
     },
     "minimum-stability": "dev"
