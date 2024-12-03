@@ -1,6 +1,6 @@
 {
     "name": "radishesflight/electronic-prescribing",
-    "description": "多张优惠券,计算出优惠最大的",
+    "description": "电子处方",
     "type": "library",
     "version": "1.0.0",
     "keywords": [
