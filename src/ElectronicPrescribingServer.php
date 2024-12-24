@@ -6,29 +6,26 @@ use Exception;
 use RuntimeException;
 use SplObjectStorage;
 
-// 序列号与密码
-define('API_CODE', '13311111111');
-define('API_KEY', 'test123456');
-
 class ElectronicPrescribingServer
 {
-    public $obj;
+    public self $obj;
+    public string $host;
+    public string $apiCode = '';
+    public string $apiKey = '';
+    public array $params = [];
 
-    private function __construct()
+    public function __construct($host, $apiCode, $apiKey)
     {
-
+        $this->host = $host;
+        $this->apiCode = $apiCode;
+        $this->apiKey = $apiKey;
+        return $this;
     }
-
-    public static function init()
-    {
-        return new self();
-    }
-
 
     /**
      * 计算md5
      */
-    function md5($input)
+    private function md5($input)
     {
         try {
             $md = hash_init('md5');
@@ -42,7 +39,7 @@ class ElectronicPrescribingServer
     /**
      * 生成签名原串
      */
-    public function signString($params, $unSignKeys)
+    private function signString($params, $unSignKeys)
     {
         $sb = '';
         $map = [];
@@ -67,10 +64,203 @@ class ElectronicPrescribingServer
      */
     public function sign($params)
     {
-        $params['api_code'] = API_CODE;
+        $params['api_code'] = $this->apiCode;
         $params['timestamp'] = time();
-        $signstr = $this->signString($params, ['api_sign']);
-        $params['api_sign'] = $this->md5($signstr . $this->md5(API_KEY));
+        $signstr = $this->signString($params, ['api_sign', 'file']);
+        $params['api_sign'] = $this->md5($signstr . $this->md5($this->apiKey));
         return $params;
     }
+
+    public function curl($url, $data)
+    {
+        $queryString = http_build_query($data);
+        //$params数组处理成变量$string形式的字符串
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $queryString,
+            CURLOPT_HTTPHEADER => [
+                "Content-Type:application/x-www-form-urlencoded",
+                "Accept:application/json",
+            ],
+        ]);
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            return "cURL Error #:" . $err;
+        } else {
+            return json_decode($response, true);
+        }
+    }
+
+    /**
+     * @param $data
+     * [
+     * 'ywid'=>mt_rand(11111,99999),
+     * 'status'=>1,
+     * 'patient_name'=>'缪文国',
+     * 'patient_age'=>'29',
+     * 'patient_sex'=>'男',
+     * 'patient_phone'=>'13589887777',
+     * 'patient_idcard'=>'530321199409070016',
+     * 'rx_item_json'=>'[{"project_code":"20220804536170","project_name":"鲑鱼降钙素鼻喷剂","standard":"第三⽅规格","total":"1","batchnumber":"批号","manufacturer_code":"⼚家编码","manufacturer_name":"⼚家名称"}]',
+     * 'disease_json'=>'[{"icd_code":"编码","icd_name":"名称"}]',
+     * ]
+     * @param bool $isReturnObj
+     * 创建处⽅订单
+     * @return array|bool|ElectronicPrescribingServer|string
+     */
+
+    public function createRxinfo($data, bool $isReturnObj = true): ElectronicPrescribingServer|bool|array|string|static
+    {
+        $data = $this->sign($data);
+        $this->params = $this->curl($this->host . '/createRxinfo.json', $data);
+        if ($isReturnObj) {
+            return $this;
+        }
+        return $this->params;
+    }
+
+    /**
+     * @param array $data
+     * @return mixed|string
+     * 获取处⽅订单信息
+     */
+    public function getRxinfo(array $data = []): mixed
+    {
+        $data = empty($data) ? [
+            'rx_id' => $this->params['list'][0]['rx_id'],
+            'ywid' => $this->params['list'][0]['ywid'],
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/getRxinfo.json', $data);
+    }
+
+
+    /**
+     * @param $data
+     * @return mixed|string
+     * 获取平台处⽅pdf和图⽚下载地址
+     */
+    public function getRxFileUrl($data): mixed
+    {
+        $data = empty($data) ? [
+            'rx_id' => $this->params['list'][0]['rx_id'],
+            'ywid' => $this->params['list'][0]['ywid'],
+            'style' => 1,//⽂档样式，1 横版,公章顶部居中 2 横版,公章右下 5 竖版,公章顶部居中 6 竖版,公章右下
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/getRxFileUrl', $data);
+    }
+
+    /**
+     * 删除处方订单信息
+     * @param array $data
+     * @return mixed|string
+     */
+    public function deleteRxinfo(array $data = []): mixed
+    {
+        $data = empty($data) ? [
+            'rx_id' => $this->params['list'][0]['rx_id'],
+            'ywid' => $this->params['list'][0]['ywid'],
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/deleteRxinfo.json', $data);
+    }
+
+    /**
+     * @param $data
+     * @return bool|string
+     * 获取交互id,⽤于聊天及⽂件上传
+     */
+    public function getTempId($data): bool|string
+    {
+        $data = empty($data) ? [
+            'call_url' => $this->params['list'][0]['call_url'],
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/getTempId.json', $data);
+    }
+
+
+    /**
+     * @param string $message
+     * @param array $data
+     * 发送聊天内容
+     * @return mixed|string
+     */
+    public function createChat(array $data = [], string $message = ''): mixed
+    {
+        $data = empty($data) ? [
+            'temp_id' => $this->params['list'][0]['temp_id'],
+            'chat_text' => $message,
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/createChat.json', $data);
+    }
+
+    /**
+     * @param $file
+     * @param string $file_url
+     * @param array $data
+     * 聊天⽂件上传
+     * @return mixed|string
+     */
+    public function createChatFile(array $data = [], $file = null, string $file_url = ''): mixed
+    {
+        $data = empty($data) ? [
+            'temp_id' => $this->params['list'][0]['temp_id'],
+            'file' => $file,//⽂件(不参与签名),与file参数互斥,⼆者必须传⼀
+            'file_url' => $file_url,//⽂件(不参与签名),与file参数互斥,⼆者必须传⼀
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/createChatFile.json', $data);
+    }
+
+    /**
+     * @param array $data
+     * @return mixed|string
+     * 获取聊天记录列表
+     */
+    public function queryChatLogList(array $data = []): mixed
+    {
+        $data = empty($data) ? [
+            'temp_id' => $this->params['list'][0]['temp_id'],
+        ] : $data;
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/queryChatLogList.json', $data);
+    }
+
+    /**
+     * @param array $data ["keyword"=>"",//患者关键词，姓名/⼿机号/身份证 可为空 "rx_type"=>"",//类型 0 线上(⻔店扣费) 1线下 2 线上(总部扣费 "chinese_flag"=>"",//中药处⽅标识 1 是 0否 "rx_num"=>""//唯⼀标识，业务id或序列号]
+     * @return mixed|string
+     * 分⻚查询未完成处⽅列表
+     */
+    public function queryRxInfoPage(array $data = []): mixed
+    {
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/queryRxInfoPage.json', $data);
+    }
+
+    /**
+     * @param array $data ["keyword"=>"",//患者关键词，姓名/⼿机号/身份证 可为空 "rx_type"=>"",//类型 0 线上(⻔店扣费) 1线下 2 线上(总部扣费 "chinese_flag"=>"",//中药处⽅标识 1 是 0否 "rx_num"=>""//唯⼀标识，业务id或序列号]
+     * @return mixed|string
+     * 分⻚查询已完成处⽅列表
+     */
+    public function queryRxInfoHisPage(array $data = []): mixed
+    {
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/queryRxInfoHisPage.json', $data);
+    }
+
 }
