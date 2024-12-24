@@ -65,7 +65,9 @@ class ElectronicPrescribingServer
     public function sign($params)
     {
         $params['api_code'] = $this->apiCode;
-        $params['timestamp'] = time();
+        $microtime = microtime(true);
+        $milliseconds = round($microtime * 1000);
+        $params['timestamp'] = $milliseconds;
         $signstr = $this->signString($params, ['api_sign', 'file']);
         $params['api_sign'] = $this->md5($signstr . $this->md5($this->apiKey));
         return $params;
@@ -194,6 +196,24 @@ class ElectronicPrescribingServer
 
 
     /**
+     * @param array $data
+     * @return string
+     * 跳转到平台图⽂或视频沟通⻚⾯
+     */
+    public function goToRxChat(array $data = []): string
+    {
+        $data = array_merge([
+            'rx_id' => $this->params['list'][0]['rx_id'],
+            'ywid' => $this->params['list'][0]['ywid'],
+            'model' => 0,
+            'control' => 0,//⻚⾯控制 0 默认 2 隐藏title(只对移动端⽣效)
+            'client' => 1,//客户端类型 0 PC端(电脑⽹⻚) 1 移动端(⼩程序或⼿机⽹⻚)
+        ], $data);
+        $data = $this->sign($data);
+        return  $this->host . '/goToRxChat.html?'.http_build_query($data);
+    }
+
+    /**
      * @param string $message
      * @param array $data
      * 发送聊天内容
@@ -262,5 +282,4 @@ class ElectronicPrescribingServer
         $data = $this->sign($data);
         return $this->curl($this->host . '/queryRxInfoHisPage.json', $data);
     }
-
 }
