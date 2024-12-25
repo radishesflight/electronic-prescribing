@@ -189,10 +189,10 @@ class ElectronicPrescribingServer
 
 
     /**
-     * @param array $data
+     * @param $data
      * 跳转到平台图⽂或视频沟通⻚⾯
      */
-    public function goToRxChat(array $data = [])
+    public function goToRxChat($data = [])
     {
         $data = array_merge([
             'rx_id' => $this->params['list'][0]['rx_id'],
@@ -204,6 +204,7 @@ class ElectronicPrescribingServer
         $data = $this->sign($data);
         return  $this->host . '/goToRxChat.html?'.http_build_query($data);
     }
+
 
     /**
      * @param string $message
