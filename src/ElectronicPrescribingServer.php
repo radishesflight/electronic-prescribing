@@ -4,15 +4,13 @@ namespace RadishesFlight\ElectronicPrescribing;
 
 use Exception;
 use RuntimeException;
-use SplObjectStorage;
 
 class ElectronicPrescribingServer
 {
-    public self $obj;
-    public string $host;
-    public string $apiCode = '';
-    public string $apiKey = '';
-    public array $params = [];
+    public  $host;
+    public  $apiCode = '';
+    public  $apiKey = '';
+    public  $params = [];
 
     public function __construct($host, $apiCode, $apiKey)
     {
@@ -120,10 +118,9 @@ class ElectronicPrescribingServer
      * ]
      * @param bool $isReturnObj
      * 创建处⽅订单
-     * @return array|bool|ElectronicPrescribingServer|string
      */
 
-    public function createRxinfo($data, bool $isReturnObj = true): ElectronicPrescribingServer|bool|array|string|static
+    public function createRxinfo($data, bool $isReturnObj = true)
     {
         $data = $this->sign($data);
         $this->params = $this->curl($this->host . '/createRxinfo.json', $data);
@@ -135,10 +132,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param array $data
-     * @return mixed|string
      * 获取处⽅订单信息
      */
-    public function getRxinfo(array $data = []): mixed
+    public function getRxinfo(array $data = [])
     {
         $data = empty($data) ? [
             'rx_id' => $this->params['list'][0]['rx_id'],
@@ -151,10 +147,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param $data
-     * @return mixed|string
      * 获取平台处⽅pdf和图⽚下载地址
      */
-    public function getRxFileUrl($data): mixed
+    public function getRxFileUrl($data)
     {
         $data = empty($data) ? [
             'rx_id' => $this->params['list'][0]['rx_id'],
@@ -168,9 +163,8 @@ class ElectronicPrescribingServer
     /**
      * 删除处方订单信息
      * @param array $data
-     * @return mixed|string
      */
-    public function deleteRxinfo(array $data = []): mixed
+    public function deleteRxinfo(array $data = [])
     {
         $data = empty($data) ? [
             'rx_id' => $this->params['list'][0]['rx_id'],
@@ -182,10 +176,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param $data
-     * @return bool|string
      * 获取交互id,⽤于聊天及⽂件上传
      */
-    public function getTempId($data): bool|string
+    public function getTempId($data)
     {
         $data = empty($data) ? [
             'call_url' => $this->params['list'][0]['call_url'],
@@ -197,10 +190,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param array $data
-     * @return string
      * 跳转到平台图⽂或视频沟通⻚⾯
      */
-    public function goToRxChat(array $data = []): string
+    public function goToRxChat(array $data = [])
     {
         $data = array_merge([
             'rx_id' => $this->params['list'][0]['rx_id'],
@@ -217,9 +209,8 @@ class ElectronicPrescribingServer
      * @param string $message
      * @param array $data
      * 发送聊天内容
-     * @return mixed|string
      */
-    public function createChat(array $data = [], string $message = ''): mixed
+    public function createChat(array $data = [], string $message = '')
     {
         $data = empty($data) ? [
             'temp_id' => $this->params['list'][0]['temp_id'],
@@ -234,9 +225,8 @@ class ElectronicPrescribingServer
      * @param string $file_url
      * @param array $data
      * 聊天⽂件上传
-     * @return mixed|string
      */
-    public function createChatFile(array $data = [], $file = null, string $file_url = ''): mixed
+    public function createChatFile(array $data = [], $file = null, string $file_url = '')
     {
         $data = empty($data) ? [
             'temp_id' => $this->params['list'][0]['temp_id'],
@@ -249,10 +239,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param array $data
-     * @return mixed|string
      * 获取聊天记录列表
      */
-    public function queryChatLogList(array $data = []): mixed
+    public function queryChatLogList(array $data = [])
     {
         $data = empty($data) ? [
             'temp_id' => $this->params['list'][0]['temp_id'],
@@ -263,10 +252,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param array $data ["keyword"=>"",//患者关键词，姓名/⼿机号/身份证 可为空 "rx_type"=>"",//类型 0 线上(⻔店扣费) 1线下 2 线上(总部扣费 "chinese_flag"=>"",//中药处⽅标识 1 是 0否 "rx_num"=>""//唯⼀标识，业务id或序列号]
-     * @return mixed|string
      * 分⻚查询未完成处⽅列表
      */
-    public function queryRxInfoPage(array $data = []): mixed
+    public function queryRxInfoPage(array $data = [])
     {
         $data = $this->sign($data);
         return $this->curl($this->host . '/queryRxInfoPage.json', $data);
@@ -274,10 +262,9 @@ class ElectronicPrescribingServer
 
     /**
      * @param array $data ["keyword"=>"",//患者关键词，姓名/⼿机号/身份证 可为空 "rx_type"=>"",//类型 0 线上(⻔店扣费) 1线下 2 线上(总部扣费 "chinese_flag"=>"",//中药处⽅标识 1 是 0否 "rx_num"=>""//唯⼀标识，业务id或序列号]
-     * @return mixed|string
      * 分⻚查询已完成处⽅列表
      */
-    public function queryRxInfoHisPage(array $data = []): mixed
+    public function queryRxInfoHisPage(array $data = [])
     {
         $data = $this->sign($data);
         return $this->curl($this->host . '/queryRxInfoHisPage.json', $data);
