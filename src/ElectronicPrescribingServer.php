@@ -152,13 +152,13 @@ class ElectronicPrescribingServer
      * @param $data
      * 获取平台处⽅pdf和图⽚下载地址
      */
-    public function getRxFileUrl($data)
+    public function getRxFileUrl($data=[])
     {
-        $data = empty($data) ? [
+        $data = array_merge([
             'rx_id' => $this->params['list'][0]['rx_id'],
             'ywid' => $this->params['list'][0]['ywid'],
             'style' => 1,//⽂档样式，1 横版,公章顶部居中 2 横版,公章右下 5 竖版,公章顶部居中 6 竖版,公章右下
-        ] : $data;
+        ],$data);
         $data = $this->sign($data);
         return $this->curl($this->host . '/getRxFileUrl', $data);
     }
@@ -198,8 +198,8 @@ class ElectronicPrescribingServer
     public function goToRxChat($data = [])
     {
         $data = array_merge([
-            'rx_id' => $this->params['list'][0]['rx_id'],
-            'ywid' => $this->params['list'][0]['ywid'],
+            'rx_id' => $this->params['list'][0]['rx_id']??0,
+            'ywid' => $this->params['list'][0]['ywid']??0,
             'model' => 0,
             'control' => 0,//⻚⾯控制 0 默认 2 隐藏title(只对移动端⽣效)
             'client' => 1,//客户端类型 0 PC端(电脑⽹⻚) 1 移动端(⼩程序或⼿机⽹⻚)
