@@ -124,6 +124,9 @@ class ElectronicPrescribingServer
     {
         $data = $this->sign($data);
         $this->params = $this->curl($this->host . '/createRxinfo.json', $data);
+        if ($this->params['success']===false){
+            throw new RuntimeException($this->params['message']);
+        }
         if ($isReturnObj) {
             return $this;
         }
