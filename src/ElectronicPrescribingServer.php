@@ -155,8 +155,8 @@ class ElectronicPrescribingServer
     public function getRxFileUrl($data=[])
     {
         $data = array_merge([
-            'rx_id' => $this->params['list'][0]['rx_id'],
-            'ywid' => $this->params['list'][0]['ywid'],
+            'rx_id' => $this->params['list'][0]['rx_id']??0,
+            'ywid' => $this->params['list'][0]['ywid']??0,
             'style' => 1,//⽂档样式，1 横版,公章顶部居中 2 横版,公章右下 5 竖版,公章顶部居中 6 竖版,公章右下
         ],$data);
         $data = $this->sign($data);
