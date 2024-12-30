@@ -15,4 +15,14 @@
             'disease_json'=>'[{"icd_code":"编码","icd_name":"名称"}]',
         ])->createChat([],'你好啊');
         $a=$obj->queryChatLogList();
+
+        $obj=new ElectronicPrescribingServer('https://test-zxcf.gdsz101.com/api','13311111111','test123456');
+        $a=  $obj->medicineMatching([
+            'goods_name'=>'阿莫西林胶囊',
+            'standard'=>'0.5g/粒*15粒/盒',
+            'goods_code'=>'20210319137771',
+            'bar_code'=>'',//商品条形码
+            'batchnumber'=>'商品批号',//商品批号
+            'manufacturer_name'=>'商品⽣产⼚家',//商品⽣产⼚家
+        ]);
 ```
