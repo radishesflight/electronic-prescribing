@@ -273,4 +273,15 @@ class ElectronicPrescribingServer
         $data = $this->sign($data);
         return $this->curl($this->host . '/queryRxInfoHisPage.json', $data);
     }
+
+    /**
+     * @param array $data
+     * @return mixed|string
+     * 药品字典对码匹配
+     */
+    public function medicineMatching(array $data=[])
+    {
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/medicineMatching.json', $data);
+    }
 }
