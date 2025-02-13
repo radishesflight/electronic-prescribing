@@ -7,10 +7,10 @@ use RuntimeException;
 
 class ElectronicPrescribingServer
 {
-    public  $host;
-    public  $apiCode = '';
-    public  $apiKey = '';
-    public  $params = [];
+    public $host;
+    public $apiCode = '';
+    public $apiKey = '';
+    public $params = [];
 
     public function __construct($host, $apiCode, $apiKey)
     {
@@ -124,7 +124,7 @@ class ElectronicPrescribingServer
     {
         $data = $this->sign($data);
         $this->params = $this->curl($this->host . '/createRxinfo.json', $data);
-        if ($this->params['success']===false){
+        if ($this->params['success'] === false) {
             throw new RuntimeException($this->params['message']);
         }
         if ($isReturnObj) {
@@ -152,13 +152,13 @@ class ElectronicPrescribingServer
      * @param $data
      * 获取平台处⽅pdf和图⽚下载地址
      */
-    public function getRxFileUrl($data=[])
+    public function getRxFileUrl($data = [])
     {
         $data = array_merge([
-            'rx_id' => $this->params['list'][0]['rx_id']??0,
-            'ywid' => $this->params['list'][0]['ywid']??0,
+            'rx_id' => $this->params['list'][0]['rx_id'] ?? 0,
+            'ywid' => $this->params['list'][0]['ywid'] ?? 0,
             'style' => 1,//⽂档样式，1 横版,公章顶部居中 2 横版,公章右下 5 竖版,公章顶部居中 6 竖版,公章右下
-        ],$data);
+        ], $data);
         $data = $this->sign($data);
         return $this->curl($this->host . '/getRxFileUrl', $data);
     }
@@ -198,14 +198,14 @@ class ElectronicPrescribingServer
     public function goToRxChat($data = [])
     {
         $data = array_merge([
-            'rx_id' => $this->params['list'][0]['rx_id']??0,
-            'ywid' => $this->params['list'][0]['ywid']??0,
+            'rx_id' => $this->params['list'][0]['rx_id'] ?? 0,
+            'ywid' => $this->params['list'][0]['ywid'] ?? 0,
             'model' => 0,
             'control' => 0,//⻚⾯控制 0 默认 2 隐藏title(只对移动端⽣效)
             'client' => 1,//客户端类型 0 PC端(电脑⽹⻚) 1 移动端(⼩程序或⼿机⽹⻚)
         ], $data);
         $data = $this->sign($data);
-        return  $this->host . '/goToRxChat.html?'.http_build_query($data);
+        return $this->host . '/goToRxChat.html?' . http_build_query($data);
     }
 
 
@@ -279,9 +279,18 @@ class ElectronicPrescribingServer
      * @return mixed|string
      * 药品字典对码匹配
      */
-    public function medicineMatching(array $data=[])
+    public function medicineMatching(array $data = [])
     {
         $data = $this->sign($data);
         return $this->curl($this->host . '/medicineMatching.json', $data);
+    }
+
+    /**
+     * 根据药品获取建议病症
+     */
+    public function queryIcdListByMedicine(array $data = [])
+    {
+        $data = $this->sign($data);
+        return $this->curl($this->host . '/queryIcdListByMedicine.json', $data);
     }
 }
